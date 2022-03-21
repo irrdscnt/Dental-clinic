@@ -4,10 +4,29 @@ import { AppService } from './app.service';
 import { DentalController } from './dental/dental.controller';
 import { DentalService } from './dental/dental.service';
 import { DentalModule } from './dental/dental.module';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RegisterEntity } from './dental/entity';
+import * as dotenv from 'dotenv'
+
+dotenv.config();
 
 @Module({
-  imports: [DentalModule],
-  controllers: [AppController, DentalController],
-  providers: [AppService, DentalService],
+  imports:[
+    //ConfigModule.forRoot({isGlobal:true}),
+    TypeOrmModule.forRoot({
+      type:'postgres',
+      host:process.env.POSTGRES_HOST,
+      port:parseInt(<string>process.env.POSTGRES_PORT),
+      username:process.env.POSTGRES_USER,
+      password:process.env.POSTGRES_PASSWORD,
+      database:process.env.POSTGRES_DATABASE,
+      entities:[RegisterEntity],
+      //autoLoadEntities:true,
+      synchronize:true,
+    }),DentalModule,
+  ],
+  controllers: [],
+  providers: []
 })
 export class AppModule {}
