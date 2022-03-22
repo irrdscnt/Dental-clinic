@@ -1,5 +1,5 @@
 export interface IDoc{
     docId:number;
-    name:string;
+    docName:string;
     price:number;
 }
