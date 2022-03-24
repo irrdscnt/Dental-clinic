@@ -6,6 +6,9 @@ export class RegisterEntity {
     @PrimaryGeneratedColumn("uuid")
     regId:number;
 
+    @Column({default:true})
+    active:boolean;
+
     @Column({type:'text'})
     name:string;
 
@@ -13,7 +16,10 @@ export class RegisterEntity {
     phone:string;
 
     @CreateDateColumn()
-    date:Date;
+    startDate:Date;
+
+    @CreateDateColumn({default:'2022-02-01T00:00:00.000Z'})
+    endDate?:Date;
 
     @Column()
     docId:number;
@@ -21,7 +27,7 @@ export class RegisterEntity {
     @Column({nullable:true})
     price:number;
 
-    @Column({nullable:true})
+    @Column({nullable: true})
     docName:string;
 
    
