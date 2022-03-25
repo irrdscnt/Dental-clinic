@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
 import { Observable } from 'rxjs';
 import { DeleteResult, UpdateResult } from 'typeorm';
 import { DentalService } from './dental.service';
-import { CreateRegisterDto, FindOneDto, UpdateRegisterDto } from './dto';
 import { RegisterEntity } from './entity';
 import { IDoc, IRegister } from './interface';
 
@@ -10,18 +9,18 @@ import { IDoc, IRegister } from './interface';
 export class DentalController {
     constructor(private readonly service:DentalService){}
 
+    @Get('/active')
+    findActive(@Body() reg:RegisterEntity){
+        return this.service.findActive(reg);
+    } 
+
     @Get(':docId')
     findOne(@Param('docId') docId:number) {
         return this.service.findDocReg(docId);
     }
-
-    // @Get('active')
-    // findActive(@Body() reg:RegisterEntity){
-    //     return this.service.findActive(reg);
-    // }
-
+    
     @Post()
-    create(@Body() reg:CreateRegisterDto):Observable<CreateRegisterDto> {
+    create(@Body() reg:RegisterEntity):Observable<RegisterEntity> {
     return this.service.create(reg);
     }
 
@@ -33,7 +32,7 @@ export class DentalController {
     @Put(':id')
     update(
         @Param('id')id:number,
-        @Body() reg:UpdateRegisterDto){
+        @Body() reg:RegisterEntity){
         return this.service.update(id,reg)
     }
 

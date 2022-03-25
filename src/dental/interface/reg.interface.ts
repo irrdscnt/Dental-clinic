@@ -1,6 +1,5 @@
 export interface IRegister {
     regId:number;
-    active:boolean;
     name: string;
     phone: string;
     startDate: Date;

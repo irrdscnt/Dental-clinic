@@ -6,9 +6,6 @@ export class RegisterEntity {
     @PrimaryGeneratedColumn("uuid")
     regId:number;
 
-    @Column({default:true})
-    active:boolean;
-
     @Column({type:'text'})
     name:string;
 

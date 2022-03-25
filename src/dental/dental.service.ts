@@ -1,10 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { timingSafeEqual } from 'crypto';
-import { doc } from 'prettier';
+import {  InjectRepository } from '@nestjs/typeorm';
 import { from, Observable } from 'rxjs';
-import { DeleteDateColumn, DeleteResult, FilterQuery, MoreThan, Repository, UpdateResult } from 'typeorm';
-import { CreateRegisterDto, UpdateRegisterDto } from './dto';
+import { DeleteResult, MoreThan, Repository } from 'typeorm';
+
 import { RegisterEntity } from './entity';
 import { IDoc, IRegister } from './interface';
 
@@ -32,7 +30,9 @@ export class DentalService {
     findAll() :Observable<IRegister[]> {
         this.regRep.find()
         return from(this.regRep.find());
+        
     }
+
     // async find() {
     //     return this.DB;
     // }
@@ -53,31 +53,45 @@ export class DentalService {
         
     // }
     findActive(reg:RegisterEntity){
-        const today=new Date().getMonth()
-        const datee=new Date(reg.startDate).getMonth()
-        console.log(today)
-
-        if(datee<today){
-            return this.findAll()
-        }
-
+        const today=new Date()
+        return this.regRep.find({
+            where:{
+                startDate:MoreThan(today)
+            }
+        })
     }
     isAvailable(docId:number,startDate:Date){
-        const newd=new Date(startDate)
-        if(docId){
-            const exist=this.regRep.find({startDate}) 
-            if(!exist){
-                return exist
+        const neww=new Date(startDate)
+        const a=this.regRep.find({startDate})
+        console.log(neww,a)
+
+
+        const exist=this.regRep.find({startDate})
+        if(exist){
+            const datee=new Date(startDate)
+            if (datee){
+                throw new BadRequestException(400,'this termin is already taken')
+
             }
         }
+        //const exist=this.regRep.find({startDate})
+        // if(docId){
+        //     const newd=new Date(startDate)
+        //     const exist=this.regRep.find({startDate}) 
+        //     if(!exist){
+        //         return newd
+        //     }
+        // }
         
         
-        // //
-        // // const newd=new Date(date)
+        //
+        // const newd=new Date(date)
+        // const exist=this.regRep.find({startDate})
         // if(exist){
-        //     const datee=new Date(date)
-        //     if (!datee){
-        //         return datee
+        //     const datee=new Date(startDate)
+        //     if (datee){
+        //         throw new BadRequestException(400,'this termin is already taken')
+
         //     }
         //     // const exist=this.getHours(date)
         //     // console.log(exist)
@@ -101,22 +115,72 @@ export class DentalService {
         }
         
     }
+    isSame=(a,b)=>{
+        return a.getFullYear()===b.getFullYear() && 
+        a.getMonth()===b.getMonth() &&
+        a.getDay()===b.getDay() &&
+        a.getUTCHours()===b.getUTCHours()        
+    }
     
-    create(reg:CreateRegisterDto): Observable<CreateRegisterDto>{
+    create(reg:RegisterEntity): Observable<RegisterEntity>{
         let {docId,docName,price,startDate,endDate}=reg;
+        
         startDate=new Date(startDate)
         const end=new Date(startDate).setMilliseconds(1*60*60*1000)
         reg.endDate=new Date(end)
+
+        const b=this.regRep.find({where:{startDate:startDate}})
+        //console.log(b)
+
+        const neww=new Date(startDate)
+        const a=this.regRep.find({startDate})
+        //console.log(neww,a)
+        //console.log(`${startDate}`)
+
+        // const isSame=(a,b)=>{
+        //     return a.getFullYear()===b.getFullYear() && 
+        //     a.getMonth()===b.getMonth() ||
+        //     a.getDate()===b.getDate() ||
+        //     a.getUTCHours()===b.getUTCHours()        
+        // }
+        // //const start=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate(),startDate.getUTCHours())
+        // const newdate=new Date(startDate)
+        // if (newdate){
+        //     const newd=new Date(newdate.getFullYear(),newdate.getMonth(),newdate.getDate(),newdate.getUTCHours())
+        //     //const id = this.regRep.find({docId})
+        //     // if(docId){
+        //     reg.startDate=new Date(startDate)
+        //     console.log(newdate,reg.startDate)
+        //     // }
+        //     const start=new Date(reg.startDate.getFullYear(),reg.startDate.getMonth(),reg.startDate.getDate(),reg.startDate.getUTCHours())
+        //     // const exist=this.regRep.find({startDate})
+        //     // reg.startDate=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate(),startDate.getUTCHours())
+        //     const issSame=isSame(newd,start)
+        //     if(issSame){
+        //         throw new BadRequestException(400,'this termin is already taken')
+        //     }
+            
+        // }
+        
+
+        // if(startDate){
+        //     const exist=this.regRep.find({docId})
+        //     if(+startDate==+reg.startDate){
+        //         throw new BadRequestException(400,'this termin is already taken')
+
+        //         //return docId
+        //         // throw new BadRequestException(400,'this termin is already taken')
+                
+        //     }
+            
+        // }
 
         const exist = this.DB.find((doc) => doc.docId == docId);
         if (!exist) {
         throw new ConflictException();
         }
         
-        // if(startDate){
-        //     const exist=this.regRep.find({docId})
-            
-        // }
+        
         // const checkAvail=this.isAvailable(docId,date)
         // if(!checkAvail){
         //     throw new BadRequestException(400,'This termin is already taken!')
@@ -143,7 +207,7 @@ export class DentalService {
      
     }
 
-    update(id:number,reg:UpdateRegisterDto){
+    update(id:number,reg:RegisterEntity){
         const {startDate,docId}=reg;
         if (docId){
             const doc = this.DB.find(doc => doc.docId === docId);
@@ -155,18 +219,6 @@ export class DentalService {
             reg.docName=doc.docName
             
         }
-        // const doc = this.DB.find((doc) => doc.docId == docId);
-        // reg.docId=doc.docId
-        // reg.price=doc.price
-        // reg.docName=doc.docName
-        // const exist = this.DB.find((doc) => doc.docId == docId);
-        // if (!exist) {
-        // throw new ConflictException();
-        // }
-        // if(startDate){
-        //     const exist=this.regRep.find({docId})
-            
-        // }
         //const start=new Date(startDate)
         if (startDate){
             reg.endDate=new Date(new Date(startDate).setMilliseconds(1*60*60*1000))
