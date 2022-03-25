@@ -145,12 +145,15 @@ export class DentalService {
 
     update(id:number,reg:UpdateRegisterDto){
         const {startDate,docId}=reg;
-        
         if (docId){
-            const doc = this.DB.find((doc) => doc.docId == docId);
+            const doc = this.DB.find(doc => doc.docId === docId);
+            if(!doc){
+                throw new BadRequestException(400,'This docId does not exist!')
+            }
             reg.docId=doc.docId
             reg.price=doc.price
             reg.docName=doc.docName
+            
         }
         // const doc = this.DB.find((doc) => doc.docId == docId);
         // reg.docId=doc.docId
