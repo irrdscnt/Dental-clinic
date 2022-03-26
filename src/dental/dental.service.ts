@@ -33,25 +33,12 @@ export class DentalService {
         
     }
 
-    // async find() {
-    //     return this.DB;
-    // }
-
     getHours(date:Date){
         const getTime=new Date(`${date}`);
         let hours=getTime.getUTCHours()
         return hours
     }
 
-    // async checkDate(date:any) {
-    //     // date = new Date(date);
-    //     const weekDay = new Date(date).getDay();
-    //     if (weekDay == 0 || weekDay == 6) {
-    //         throw new BadRequestException(400, 'You cant register on weekends!')
-    //     }
-    //     
-        
-    // }
     findActive(reg:RegisterEntity){
         const today=new Date()
         return this.regRep.find({
@@ -60,50 +47,6 @@ export class DentalService {
             }
         })
     }
-    isAvailable(docId:number,startDate:Date){
-        const neww=new Date(startDate)
-        const a=this.regRep.find({startDate})
-        console.log(neww,a)
-
-
-        const exist=this.regRep.find({startDate})
-        if(exist){
-            const datee=new Date(startDate)
-            if (datee){
-                throw new BadRequestException(400,'this termin is already taken')
-
-            }
-        }
-        //const exist=this.regRep.find({startDate})
-        // if(docId){
-        //     const newd=new Date(startDate)
-        //     const exist=this.regRep.find({startDate}) 
-        //     if(!exist){
-        //         return newd
-        //     }
-        // }
-        
-        
-        //
-        // const newd=new Date(date)
-        // const exist=this.regRep.find({startDate})
-        // if(exist){
-        //     const datee=new Date(startDate)
-        //     if (datee){
-        //         throw new BadRequestException(400,'this termin is already taken')
-
-        //     }
-        //     // const exist=this.getHours(date)
-        //     // console.log(exist)
-        //     // if(exist){
-        //     //     return date
-        //     // }
-            
-        // }
-        
-    }
-    
-    
 
     findDocReg(docId: number){
         
@@ -129,62 +72,10 @@ export class DentalService {
         const end=new Date(startDate).setMilliseconds(1*60*60*1000)
         reg.endDate=new Date(end)
 
-        const b=this.regRep.find({where:{startDate:startDate}})
-        //console.log(b)
-
-        const neww=new Date(startDate)
-        const a=this.regRep.find({startDate})
-        //console.log(neww,a)
-        //console.log(`${startDate}`)
-
-        // const isSame=(a,b)=>{
-        //     return a.getFullYear()===b.getFullYear() && 
-        //     a.getMonth()===b.getMonth() ||
-        //     a.getDate()===b.getDate() ||
-        //     a.getUTCHours()===b.getUTCHours()        
-        // }
-        // //const start=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate(),startDate.getUTCHours())
-        // const newdate=new Date(startDate)
-        // if (newdate){
-        //     const newd=new Date(newdate.getFullYear(),newdate.getMonth(),newdate.getDate(),newdate.getUTCHours())
-        //     //const id = this.regRep.find({docId})
-        //     // if(docId){
-        //     reg.startDate=new Date(startDate)
-        //     console.log(newdate,reg.startDate)
-        //     // }
-        //     const start=new Date(reg.startDate.getFullYear(),reg.startDate.getMonth(),reg.startDate.getDate(),reg.startDate.getUTCHours())
-        //     // const exist=this.regRep.find({startDate})
-        //     // reg.startDate=new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate(),startDate.getUTCHours())
-        //     const issSame=isSame(newd,start)
-        //     if(issSame){
-        //         throw new BadRequestException(400,'this termin is already taken')
-        //     }
-            
-        // }
-        
-
-        // if(startDate){
-        //     const exist=this.regRep.find({docId})
-        //     if(+startDate==+reg.startDate){
-        //         throw new BadRequestException(400,'this termin is already taken')
-
-        //         //return docId
-        //         // throw new BadRequestException(400,'this termin is already taken')
-                
-        //     }
-            
-        // }
-
         const exist = this.DB.find((doc) => doc.docId == docId);
         if (!exist) {
         throw new ConflictException();
         }
-        
-        
-        // const checkAvail=this.isAvailable(docId,date)
-        // if(!checkAvail){
-        //     throw new BadRequestException(400,'This termin is already taken!')
-        // }
         
         const weekday=new Date(startDate).getDay();
         if (weekday==0||weekday==6){
@@ -219,7 +110,6 @@ export class DentalService {
             reg.docName=doc.docName
             
         }
-        //const start=new Date(startDate)
         if (startDate){
             reg.endDate=new Date(new Date(startDate).setMilliseconds(1*60*60*1000))
         }
