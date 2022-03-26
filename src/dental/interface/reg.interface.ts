@@ -1,12 +1,12 @@
 export interface IRegister {
-    regId:number;
+    regId?:string;
     name: string;
     phone: string;
     startDate: Date;
     endDate?:Date;
     docId: number;
-    docName:string;
-    price: number;
+    docName?:string;
+    price?: number;
 
   }
   

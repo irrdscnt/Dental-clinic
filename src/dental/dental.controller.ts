@@ -1,7 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { ApiConflictResponse, ApiCreatedResponse, ApiNotFoundResponse } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
-import { DeleteResult, UpdateResult } from 'typeorm';
+import { DeleteResult } from 'typeorm';
 import { DentalService } from './dental.service';
+import { CreateRegisterDto, UpdateRegisterDto } from './dto';
 import { RegisterEntity } from './entity';
 import { IDoc, IRegister } from './interface';
 
@@ -10,8 +12,8 @@ export class DentalController {
     constructor(private readonly service:DentalService){}
 
     @Get('/active')
-    findActive(@Body() reg:RegisterEntity){
-        return this.service.findActive(reg);
+    findActive(){
+        return this.service.findActive();
     } 
 
     @Get(':docId')
@@ -20,7 +22,9 @@ export class DentalController {
     }
     
     @Post()
-    create(@Body() reg:RegisterEntity):Observable<RegisterEntity> {
+    @ApiCreatedResponse({ type: CreateRegisterDto})
+    @ApiConflictResponse({ description: 'already exist' })
+    create(@Body() reg:CreateRegisterDto){
     return this.service.create(reg);
     }
 
@@ -30,9 +34,11 @@ export class DentalController {
     }
 
     @Put(':id')
+    @ApiCreatedResponse({ type: UpdateRegisterDto })
+    @ApiNotFoundResponse()
     update(
-        @Param('id')id:number,
-        @Body() reg:RegisterEntity){
+        @Param('id')id:string,
+        @Body() reg:UpdateRegisterDto){
         return this.service.update(id,reg)
     }
 
@@ -42,7 +48,8 @@ export class DentalController {
     }
 
     @Delete(':id')
-    delete(@Param('id') id:number) : Observable<DeleteResult> {
+    @ApiNotFoundResponse({ description: ' already deleted' })
+    delete(@Param('id') id:string) : Observable<DeleteResult> {
         return this.service.delete(id)
     }
 

@@ -4,7 +4,7 @@ import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn
 @Entity()
 export class RegisterEntity {
     @PrimaryGeneratedColumn("uuid")
-    regId:number;
+    regId?:string;
 
     @Column({type:'text'})
     name:string;
@@ -22,10 +22,10 @@ export class RegisterEntity {
     docId:number;
 
     @Column({nullable:true})
-    price:number;
+    price?:number;
 
     @Column({nullable: true})
-    docName:string;
+    docName?:string;
 
    
 

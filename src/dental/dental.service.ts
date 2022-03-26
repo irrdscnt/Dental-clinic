@@ -1,7 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import {  InjectRepository } from '@nestjs/typeorm';
 import { from, Observable } from 'rxjs';
-import { DeleteResult, MoreThan, Repository } from 'typeorm';
+import { DeleteResult, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { CreateRegisterDto, UpdateRegisterDto } from './dto';
 
 import { RegisterEntity } from './entity';
 import { IDoc, IRegister } from './interface';
@@ -39,7 +40,7 @@ export class DentalService {
         return hours
     }
 
-    findActive(reg:RegisterEntity){
+    findActive(){
         const today=new Date()
         return this.regRep.find({
             where:{
@@ -58,19 +59,27 @@ export class DentalService {
         }
         
     }
-    isSame=(a,b)=>{
-        return a.getFullYear()===b.getFullYear() && 
-        a.getMonth()===b.getMonth() &&
-        a.getDay()===b.getDay() &&
-        a.getUTCHours()===b.getUTCHours()        
-    }
     
-    create(reg:RegisterEntity): Observable<RegisterEntity>{
+    async create(reg:CreateRegisterDto){
         let {docId,docName,price,startDate,endDate}=reg;
         
         startDate=new Date(startDate)
         const end=new Date(startDate).setMilliseconds(1*60*60*1000)
         reg.endDate=new Date(end)
+
+        const enddate=new Date(reg.endDate)
+        const startdate=new Date(reg.startDate)
+        const isAvailable= await this.regRep.find({
+            where:{
+                docId:reg.docId,
+                startDate:LessThanOrEqual(enddate),
+                endDate:MoreThanOrEqual(startdate)
+            }
+        })
+        if (isAvailable.length>0){
+            throw new BadRequestException(400,'this termin is already taken!')
+        }
+
 
         const exist = this.DB.find((doc) => doc.docId == docId);
         if (!exist) {
@@ -98,8 +107,10 @@ export class DentalService {
      
     }
 
-    update(id:number,reg:RegisterEntity){
-        const {startDate,docId}=reg;
+    async update(id:string,reg:UpdateRegisterDto){
+        // let {docId,docName,price,startDate,endDate}=reg;
+        let {startDate,docId}=reg;
+
         if (docId){
             const doc = this.DB.find(doc => doc.docId === docId);
             if(!doc){
@@ -110,11 +121,35 @@ export class DentalService {
             reg.docName=doc.docName
             
         }
-        if (startDate){
-            reg.endDate=new Date(new Date(startDate).setMilliseconds(1*60*60*1000))
+
+        
+        if (reg.startDate){
+            if (docId){
+                reg.startDate=new Date(startDate)
+                const end=new Date(startDate).setMilliseconds(1*60*60*1000)
+                reg.endDate=new Date(end)
+                const enddate=new Date(reg.endDate)
+                const startdate=new Date(reg.startDate)
+                const isAvailable= await this.regRep.find({
+                    where:{
+                        docId:reg.docId,
+                        startDate:LessThanOrEqual(enddate),
+                        endDate:MoreThanOrEqual(startdate)
+                    }
+                })
+                if (isAvailable.length>0){
+                    throw new BadRequestException(400,'this termin is already taken!')
+                }
+            }
+            if(!docId){
+                throw new BadRequestException(400,'Please make sure to indicate docId')
+            }
         }
         
         
+            
+       // }
+        // reg.endDate=new Date(new Date(startDate).setMilliseconds(1*60*60*1000))
         const weekday=new Date(startDate).getDay();
         if (weekday==0||weekday==6){
             throw new BadRequestException(400, 'You cant register on weekends!');
@@ -124,13 +159,12 @@ export class DentalService {
         if(hours>16 || hours<9){
             throw new BadRequestException(400, 'workhours are from 9-17!');
         } else if(hours==12){
-            throw new BadRequestException(400,'lunch break')
+        throw new BadRequestException(400,'lunch break')
         }
-        
         return from(this.regRep.update(id,reg))
-    } 
+    }
 
-    delete(id:number):Observable<DeleteResult>{
+    delete(id:string):Observable<DeleteResult>{
         return from(this.regRep.delete(id));
     }
     deleteAll(){
