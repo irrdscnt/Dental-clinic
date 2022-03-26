@@ -61,7 +61,7 @@ export class DentalService {
     }
     
     async create(reg:CreateRegisterDto){
-        let {docId,docName,price,startDate,endDate}=reg;
+        let {docId,startDate}=reg;
         
         startDate=new Date(startDate)
         const end=new Date(startDate).setMilliseconds(1*60*60*1000)
@@ -108,7 +108,6 @@ export class DentalService {
     }
 
     async update(id:string,reg:UpdateRegisterDto){
-        // let {docId,docName,price,startDate,endDate}=reg;
         let {startDate,docId}=reg;
 
         if (docId){
@@ -146,10 +145,6 @@ export class DentalService {
             }
         }
         
-        
-            
-       // }
-        // reg.endDate=new Date(new Date(startDate).setMilliseconds(1*60*60*1000))
         const weekday=new Date(startDate).getDay();
         if (weekday==0||weekday==6){
             throw new BadRequestException(400, 'You cant register on weekends!');
